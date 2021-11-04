@@ -92,6 +92,9 @@ public class ExchangeRateReader {
 	   	 
 	String dayString;
 	String monthString;
+
+	// Check if day and month are less than 10
+	// If they are, then add a 0 in front
 	if(day < 10) {
 		dayString  = "0" + String.valueOf(day);
 	}
@@ -105,21 +108,27 @@ public class ExchangeRateReader {
 	else{
 		monthString = String.valueOf(month);
 	}
+	
 
+	// Construct date for URL request
 	String date = String.valueOf(year) + "-" + monthString + "-" + dayString;	
 	
+	// Construct URL request
 	String urlRequest = baseURL + date + "?access_key=" + accessKey;
 
+	// Setup URL and JSON materials
 	URL url = new URL(urlRequest);
 	InputStream inputStream = url.openStream();
 	JSONTokener token = new JSONTokener(inputStream);
 	JSONObject object = new JSONObject(token);
 	
+	// Call helper function to get currency rate
 	return getRateForCurrency(object, currencyCode);
     }
 
     public float getRateForCurrency(JSONObject ratesInfo, String currency) {
 
+	    // Get curency rate from JSON object
 	    float currencyRate = ratesInfo.getJSONObject("rates").getFloat(currency);
 	    return currencyRate;
     } 
@@ -149,6 +158,7 @@ public class ExchangeRateReader {
          * the previous method.
          */
         
+	// Get the two currecy rates
         float firstCurrency = getExchangeRate(fromCurrency, year, month, day);
 	float secondCurrency = getExchangeRate(toCurrency, year, month, day);
 
