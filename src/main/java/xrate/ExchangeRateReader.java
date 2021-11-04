@@ -1,6 +1,10 @@
 package xrate;
 
-import java.io.IOException;
+import java.io.*;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import java.net.*;
+
 
 /**
  * Provide access to basic currency exchange rate services.
@@ -8,6 +12,7 @@ import java.io.IOException;
 public class ExchangeRateReader {
 
     private String accessKey;
+    private String baseURL;
 
     /**
      * Construct an exchange rate reader using the given base URL. All requests will
@@ -28,7 +33,7 @@ public class ExchangeRateReader {
          * the full URL.)
          */
 
-        // TODO Your code here
+       this.baseURL = baseURL;
 
         // Reads the Fixer.io API access key from the appropriate
         // environment variable.
@@ -84,11 +89,50 @@ public class ExchangeRateReader {
          *       currency code from the "rates" object. 
          */
 
-        // TODO Your code here
+	   	 
+	String dayString;
+	String monthString;
 
-        // Remove the next line when you've implemented this method.
-        throw new UnsupportedOperationException();
+	// Check if day and month are less than 10
+	// If they are, then add a 0 in front
+	if(day < 10) {
+		dayString  = "0" + String.valueOf(day);
+	}
+	else{
+		dayString = String.valueOf(day);
+	}
+	
+	if(month < 10) {
+		monthString = "0" + String.valueOf(month);
+	}
+	else{
+		monthString = String.valueOf(month);
+	}
+	
+
+	// Construct date for URL request
+	String date = String.valueOf(year) + "-" + monthString + "-" + dayString;	
+	
+	// Construct URL request
+	String urlRequest = baseURL + date + "?access_key=" + accessKey;
+
+	// Setup URL and JSON materials
+	URL url = new URL(urlRequest);
+	InputStream inputStream = url.openStream();
+	JSONTokener token = new JSONTokener(inputStream);
+	JSONObject object = new JSONObject(token);
+	
+	// Call helper function to get currency rate
+	return getRateForCurrency(object, currencyCode);
     }
+
+    public float getRateForCurrency(JSONObject ratesInfo, String currency) {
+
+	    // Get curency rate from JSON object
+	    float currencyRate = ratesInfo.getJSONObject("rates").getFloat(currency);
+	    return currencyRate;
+    } 
+
 
     /**
      * Get the exchange rate of the first specified currency against the second on
@@ -114,9 +158,10 @@ public class ExchangeRateReader {
          * the previous method.
          */
         
-        // TODO Your code here
+	// Get the two currecy rates
+        float firstCurrency = getExchangeRate(fromCurrency, year, month, day);
+	float secondCurrency = getExchangeRate(toCurrency, year, month, day);
 
-        // Remove the next line when you've implemented this method.
-        throw new UnsupportedOperationException();
+	return firstCurrency / secondCurrency;
     }
 }
